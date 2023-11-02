@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Custom Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('https://images.pond5.com/question-mark-animation-quiz-background-012033064_prevstill.jpeg');
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+    
+        h1 {
+            font-size: 30px;
+            font-weight: 600;
+            text-align: center;
+            margin-top: 20px;
+            color: #001e4d;
+        }
+    
+        form {
+            background-color: white;
+            width: 90%;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 10px;
+        }
+    
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+    
+        input, button {
+            display: block;
+            width: 90%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid black;
+            border-radius: 4px;
+        }
+    
+        button {
+            background: black;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s, color 0.3s;
+        }
+    
+        button:hover {
+            background: grey;
+        }
+    
+        #quiz-container {
+            background-color: white;
+            width: 90%;
+            max-width: 600px;
+            margin: 20px auto;
+            border-radius: 10px;
+            padding: 20px;
+            display: none;
+        }
+    
+        .btn {
+            background: white;
+            color: #222;
+            font-weight: 500;
+            width: 100%;
+            border: 1px solid black;
+            padding: 10px;
+            margin: 10px 0;
+            text-align: left;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+    
+        .btn:disabled {
+            cursor: no-drop;
+        }
+    
+        .btn:hover:not([disabled]) {
+            background: black;
+            color: white;
+        }
+    
+        .correct {
+            background: #9aeabc;
+        }
+    
+        .incorrect {
+            background: #ff9393;
+        }
+        #play-again-btn{
+            display: none;
+        }
+    </style>
+    
+</head>
+<body>
+    <h1>Custom Quiz</h1>
+    <form id="custom-quiz-form">
+        <label for="question-input">Enter a new question:</label>
+        <input type="text" id="question-input" required>
+        <label for="answer1-input">Enter answer 1:</label>
+        <input type="text" id="answer1-input" required>
+        <label for="answer2-input">Enter answer 2:</label>
+        <input type="text" id="answer2-input" required>
+        <label for="answer3-input">Enter answer 3:</label>
+        <input type="text" id="answer3-input" required>
+        <label for="answer4-input">Enter answer 4:</label>
+        <input type="text" id="answer4-input" required>
+        <label for="correct-answer-input">Enter the correct answer (1-4):</label>
+        <input type="number" id="correct-answer-input" required>
+        <button type="button" id="add-question-btn">Add Question</button>
+        <button type="button" id="start-quiz-btn">Start Custom Quiz</button>
+    </form>
+    <div id="quiz-container">
+        <div id="question"></div>
+        <div id="answer-buttons"></div>
+        <button id="next-btn">Next</button>
+    </div>
+    <button id="play-again-btn">Play Again / Create Another Quiz</button>
+
+    <script>
+        const questions = [];
+        const questionElement = document.getElementById("question");
+        const answerButtons = document.getElementById("answer-buttons");
+        const nextButton = document.getElementById("next-btn");
+        const addQuestionButton = document.getElementById("add-question-btn");
+        const startQuizButton = document.getElementById("start-quiz-btn");
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        addQuestionButton.addEventListener("click", () => {
+            const questionInput = document.getElementById("question-input").value;
+            const answer1 = document.getElementById("answer1-input").value;
+            const answer2 = document.getElementById("answer2-input").value;
+            const answer3 = document.getElementById("answer3-input").value;
+            const answer4 = document.getElementById("answer4-input").value;
+            const correctAnswerIndex = parseInt(document.getElementById("correct-answer-input").value);
+
+            if (correctAnswerIndex < 1 || correctAnswerIndex > 4) {
+                alert("Please enter a correct answer index between 1 and 4.");
+                return;
+            }
+
+            questions.push({
+                question: questionInput,
+                answers: [
+                    { text: answer1, correct: correctAnswerIndex === 1 },
+                    { text: answer2, correct: correctAnswerIndex === 2 },
+                    { text: answer3, correct: correctAnswerIndex === 3 },
+                    { text: answer4, correct: correctAnswerIndex === 4 },
+                ]
+            });
+
+            alert("Question added!");
+            document.getElementById("question-input").value = "";
+            document.getElementById("answer1-input").value = "";
+            document.getElementById("answer2-input").value = "";
+            document.getElementById("answer3-input").value = "";
+            document.getElementById("answer4-input").value = "";
+            document.getElementById("correct-answer-input").value = "";
+        });
+
+        startQuizButton.addEventListener("click", () => {
+            currentQuestionIndex = 0;
+            score = 0;
+            nextButton.innerHTML = "Next";
+            showQuestion();
+            document.getElementById("custom-quiz-form").style.display = "none";
+            document.getElementById("quiz-container").style.display = "block";
+        });
+
+        function showQuestion() {
+            resetState();
+            let currentQuestion = questions[currentQuestionIndex];
+            let questionNo = currentQuestionIndex + 1;
+            questionElement.innerHTML = questionNo + ". " + currentQuestion.question;
+
+            currentQuestion.answers.forEach(answer => {
+                const button = document.createElement("button");
+                button.innerHTML = answer.text;
+                button.classList.add("btn");
+                answerButtons.appendChild(button);
+                if (answer.correct) {
+                    button.dataset.correct = answer.correct;
+                }
+                button.addEventListener("click", selectAnswer);
+            });
+        }
+
+        function resetState() {
+            nextButton.style.display = "none";
+            while (answerButtons.firstChild) {
+                answerButtons.removeChild(answerButtons.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedBtn = e.target;
+            const isCorrect = selectedBtn.dataset.correct === "true";
+            if (isCorrect) {
+                selectedBtn.classList.add("correct");
+                score++;
+            } else {
+                selectedBtn.classList.add("incorrect");
+            }
+            Array.from(answerButtons.children).forEach(button => {
+                if (button.dataset.correct === "true") {
+                    button.classList.add("correct");
+                }
+                button.disabled = true;
+            });
+            nextButton.style.display = "block";
+        }
+
+        nextButton.addEventListener("click", () => {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                showQuestion();
+            } else {
+                showScore();
+            }
+        });
+        const playAgainButton = document.getElementById("play-again-btn");
+        function showScore() {
+            resetState();
+            questionElement.innerHTML = `You scored ${score} out of ${questions.length}!`;
+            nextButton.style.display = "none";
+            playAgainButton.style.display="block";
+        }
+        // Add this code after the existing event listeners
+        //const playAgainButton = document.getElementById("play-again-btn");
+        playAgainButton.addEventListener("click", () => {
+            currentQuestionIndex = 0;
+            score = 0;
+            nextButton.innerHTML = "Next";
+            showQuestion();
+            document.getElementById("custom-quiz-form").style.display = "block"; // Show the quiz creation form
+            document.getElementById("quiz-container").style.display = "none"; // Hide the quiz results
+        });
+
+    </script>
+</body>
+</html>

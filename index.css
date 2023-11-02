@@ -1,0 +1,18 @@
+/* #navbarSupportedContent{
+    margin-left: 200px;
+} */
+    *{
+        font-family:'Poppins',sans-serif;
+        box-sizing: border-box;
+    }
+    a.navbar-brand {
+        margin-right: 100px; 
+    }
+    body{
+        background-image: url('https://images.pond5.com/question-mark-animation-quiz-background-012033064_prevstill.jpeg');
+        background-size: cover;
+        background-repeat: no-repeat;
+    }
+    .nav-item{
+        margin: 0px 20px;
+    }
